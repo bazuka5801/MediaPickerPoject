@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -120,17 +121,32 @@ public class PickerActivity extends Activity implements DataCallback, View.OnCli
 
     @AfterPermissionGranted(119)
     void getMediaData() {
-        if (EasyPermissions.hasPermissions(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            int type = argsIntent.getIntExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE_VIDEO);
-            if (type == PickerConfig.PICKER_IMAGE_VIDEO) {
-                getLoaderManager().initLoader(type, null, new MediaLoader(this, this));
-            } else if (type == PickerConfig.PICKER_IMAGE) {
-                getLoaderManager().initLoader(type, null, new ImageLoader(this, this));
-            } else if (type == PickerConfig.PICKER_VIDEO) {
-                getLoaderManager().initLoader(type, null, new VideoLoader(this, this));
+        if (Build.VERSION.SDK_INT > 32) {
+            if (EasyPermissions.hasPermissions(this, "android.permission.READ_MEDIA_IMAGES")) {
+                int type = argsIntent.getIntExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE_VIDEO);
+                if (type == PickerConfig.PICKER_IMAGE_VIDEO) {
+                    getLoaderManager().initLoader(type, null, new MediaLoader(this, this));
+                } else if (type == PickerConfig.PICKER_IMAGE) {
+                    getLoaderManager().initLoader(type, null, new ImageLoader(this, this));
+                } else if (type == PickerConfig.PICKER_VIDEO) {
+                    getLoaderManager().initLoader(type, null, new VideoLoader(this, this));
+                }
+            } else {
+                EasyPermissions.requestPermissions(this, "android.permission.READ_MEDIA_IMAGES", 119, "android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VIDEO");
             }
         } else {
-            EasyPermissions.requestPermissions(this, getString(R.string.READ_EXTERNAL_STORAGE), 119, Manifest.permission.READ_EXTERNAL_STORAGE);
+            if (EasyPermissions.hasPermissions(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                int type = argsIntent.getIntExtra(PickerConfig.SELECT_MODE, PickerConfig.PICKER_IMAGE_VIDEO);
+                if (type == PickerConfig.PICKER_IMAGE_VIDEO) {
+                    getLoaderManager().initLoader(type, null, new MediaLoader(this, this));
+                } else if (type == PickerConfig.PICKER_IMAGE) {
+                    getLoaderManager().initLoader(type, null, new ImageLoader(this, this));
+                } else if (type == PickerConfig.PICKER_VIDEO) {
+                    getLoaderManager().initLoader(type, null, new VideoLoader(this, this));
+                }
+            } else {
+                EasyPermissions.requestPermissions(this, getString(R.string.READ_EXTERNAL_STORAGE), 119, Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
         }
     }
 
